@@ -1,24 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
-import { useEffect, useState } from "react";
+import env from "@/lib/env";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { ResizableBox } from "react-resizable";
 import ClipLoader from "react-spinners/ClipLoader";
 
 interface TranscribeTextPageProps {}
 const TranscribeTextPage: React.FC<TranscribeTextPageProps> = ({}) => {
-  const [] = useState();
-  return (
-    <div>
-      <FileUploadForm />
-    </div>
-  );
-};
-export default TranscribeTextPage;
-
-import env from "@/lib/env";
-import axios from "axios";
-import React from "react";
-
-function FileUploadForm() {
   const [file, setFile] = useState<File | null | undefined>(null);
   const [loading, setLoading] = useState(false);
   const [transcribedText, setTranscribedText] = useState("");
@@ -86,4 +74,6 @@ function FileUploadForm() {
       )}
     </div>
   );
-}
+};
+
+export default TranscribeTextPage;
