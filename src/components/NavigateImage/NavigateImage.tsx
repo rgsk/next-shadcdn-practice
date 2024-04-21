@@ -55,7 +55,7 @@ const NavigateImage: React.FC<NavigateImageProps> = ({}) => {
 
       var finalTranscripts = "";
 
-      speechRecognizer.onresult = function (event) {
+      speechRecognizer.onresult = function (event: any) {
         for (var i = event.resultIndex; i < event.results.length; i++) {
           var transcript = event.results[i][0].transcript;
           transcript.replace("\n", "<br>");
