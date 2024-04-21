@@ -18,6 +18,7 @@ const NavigateImage: React.FC<NavigateImageProps> = ({}) => {
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
   const sendQuery = async (user_query: string) => {
     setError(false);
     setLoading(true);
@@ -52,6 +53,7 @@ const NavigateImage: React.FC<NavigateImageProps> = ({}) => {
       // speechRecognizer.interimResults = true;
       speechRecognizer.lang = "en-US";
       speechRecognizer.start();
+      setSpeaking(true);
 
       var finalTranscripts = "";
       // @ts-ignore
@@ -62,6 +64,10 @@ const NavigateImage: React.FC<NavigateImageProps> = ({}) => {
           finalTranscripts += transcript;
         }
         setTranscriptsFinal(finalTranscripts);
+      };
+
+      speechRecognizer.onspeechend = () => {
+        setSpeaking(false);
       };
     } else {
       alert(
@@ -93,7 +99,7 @@ const NavigateImage: React.FC<NavigateImageProps> = ({}) => {
             <input
               value={queryText}
               onChange={(e) => setQueryText(e.target.value)}
-              className="border border-purple-300 px-2 w-[300px]"
+              className="border border-purple-300 px-2 w-[300px] rounded-md"
               placeholder="button or text"
             />
             <Button type="submit" disabled={loading}>
@@ -104,7 +110,11 @@ const NavigateImage: React.FC<NavigateImageProps> = ({}) => {
         <div className="h-[10px]"></div>
         <div className="flex items-center gap-[20px]">
           <Button onClick={startConverting} disabled={loading}>
-            Speak
+            {speaking ? (
+              <div className="w-[15px] h-[15px] rounded-full bg-red-500"></div>
+            ) : (
+              <img src="/microphone.png" alt="" className="w-[20px]" />
+            )}
           </Button>
           <p>
             <span>{transcriptsFinal}</span>{" "}
@@ -116,7 +126,7 @@ const NavigateImage: React.FC<NavigateImageProps> = ({}) => {
             aria-label="Loading Spinner"
             data-testid="loader"
           />
-          {error && <p className="text-red-400">Error</p>}
+          {error && <p className="text-red-500">Error</p>}
         </div>
         <div className="h-[10px]"></div>
       </div>
