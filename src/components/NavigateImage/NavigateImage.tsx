@@ -44,7 +44,9 @@ const NavigateImage: React.FC<NavigateImageProps> = ({}) => {
   }, [transcriptsFinal]);
 
   const startConverting = useCallback(() => {
+    // @ts-ignore
     if (typeof window !== "undefined" && "webkitSpeechRecognition" in window) {
+      // @ts-ignore
       var speechRecognizer = new window.webkitSpeechRecognition();
       // speechRecognizer.continuous = true;
       // speechRecognizer.interimResults = true;
