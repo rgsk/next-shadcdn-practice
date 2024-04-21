@@ -148,14 +148,18 @@ const NavigateImage: React.FC<NavigateImageProps> = ({}) => {
       >
         <div
           ref={divRef}
-          className="h-full relative border border-red-500"
+          className="h-full relative"
           onClick={(e) => {
             if (edit == "true") {
               const divE = divRef.current!;
-              const width = divE.clientWidth ?? 0;
-              const height = divE.clientHeight ?? 0;
-              const leftOffset = Math.floor((e.clientX / width) * 100);
-              const topOffset = Math.floor((e.clientY / height) * 100);
+              const rect = divE.getBoundingClientRect();
+
+              const leftOffset = Math.floor(
+                ((e.clientX - rect.x) / rect.width) * 100
+              );
+              const topOffset = Math.floor(
+                ((e.clientY - rect.y) / rect.height) * 100
+              );
 
               const text = prompt();
               if (text) {
