@@ -1,19 +1,31 @@
 /* eslint-disable @next/next/no-img-element */
+import useLocalStorageState from "@/hooks/useLocalStorageState";
 import useResizeObserver from "@/hooks/useResizeObserver";
 import useWindowSize from "@/hooks/useWindowSize";
 import env from "@/lib/env";
 import axios from "axios";
+import { useRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import { Button } from "../ui/button";
-
+export type MarkedPosition = {
+  text: string;
+  position: {
+    top: string;
+    left: string;
+  };
+};
 interface NavigateImageProps {}
 const NavigateImage: React.FC<NavigateImageProps> = ({}) => {
   const divRef = useRef<HTMLDivElement>(null);
   const topBarRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const { edit } = router.query;
   const topBarRect = useResizeObserver(topBarRef);
   const windowSize = useWindowSize();
-  const [values, setValues] = useState<any[]>([]);
+  const [markedPositions, setMarkedPositions] = useLocalStorageState<
+    MarkedPosition[]
+  >("markedPositions", []);
   const [queryText, setQueryText] = useState("");
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const [loading, setLoading] = useState(false);
@@ -138,19 +150,22 @@ const NavigateImage: React.FC<NavigateImageProps> = ({}) => {
           ref={divRef}
           className="h-full relative border border-red-500"
           onClick={(e) => {
-            const divE = divRef.current!;
-            const width = divE.clientWidth ?? 0;
-            const height = divE.clientHeight ?? 0;
-            const leftOffset = Math.floor((e.clientX / width) * 100);
-            const topOffset = Math.floor((e.clientY / height) * 100);
+            if (edit == "true") {
+              const divE = divRef.current!;
+              const width = divE.clientWidth ?? 0;
+              const height = divE.clientHeight ?? 0;
+              const leftOffset = Math.floor((e.clientX / width) * 100);
+              const topOffset = Math.floor((e.clientY / height) * 100);
 
-            // const text = prompt();
-            // const newValue = {
-            //   text,
-            //   position: { top: `${topOffset}%`, left: `${leftOffset}%` },
-            // };
-            // console.log(newValue);
-            // setValues([...values, newValue]);
+              const text = prompt();
+              if (text) {
+                const newValue = {
+                  text,
+                  position: { top: `${topOffset}%`, left: `${leftOffset}%` },
+                };
+                setMarkedPositions([...markedPositions, newValue]);
+              }
+            }
           }}
         >
           <div

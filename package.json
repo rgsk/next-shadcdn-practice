@@ -29,6 +29,7 @@
     "react-spinners": "^0.13.8",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
+    "use-hooks": "^2.0.0-rc.5",
     "usehooks-ts": "^2.15.1"
   },
   "devDependencies": {
