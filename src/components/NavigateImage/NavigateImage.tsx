@@ -45,7 +45,7 @@ const NavigateImage: React.FC<NavigateImageProps> = ({}) => {
 
   const startConverting = useCallback(() => {
     if ("webkitSpeechRecognition" in window) {
-      var speechRecognizer = new webkitSpeechRecognition();
+      var speechRecognizer = new window.webkitSpeechRecognition();
       // speechRecognizer.continuous = true;
       // speechRecognizer.interimResults = true;
       speechRecognizer.lang = "en-US";
