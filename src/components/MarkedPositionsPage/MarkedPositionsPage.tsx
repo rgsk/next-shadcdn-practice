@@ -1,5 +1,7 @@
 import useJsonData from "@/hooks/useJsonData";
 import useLocalStorageState from "@/hooks/useLocalStorageState";
+import { Loader, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { MarkedPosition } from "../NavigateImage/NavigateImage";
 import { Button } from "../ui/button";
 import {
@@ -46,7 +48,14 @@ const MarkedPositionsPage: React.FC<MarkedPositionsPageProps> = ({}) => {
         </div>
       </div>
 
-      <ImagePositionsTable positions={markedPositions} />
+      <ImagePositionsTable
+        positions={markedPositions}
+        onDelete={async (position) => {
+          setMarkedPositions((positions) =>
+            positions.filter((p) => p !== position)
+          );
+        }}
+      />
 
       <div className="h-[1px] my-[100px] bg-gray-500"></div>
       <div className="flex items-center justify-between">
@@ -64,7 +73,16 @@ const MarkedPositionsPage: React.FC<MarkedPositionsPageProps> = ({}) => {
         </div>
       </div>
 
-      <ImagePositionsTable positions={formImagePositions} />
+      <ImagePositionsTable
+        positions={formImagePositions}
+        onDelete={async (position) => {
+          if (formImagePositions) {
+            await updateFormImagePositions(
+              formImagePositions.filter((p) => p !== position)
+            );
+          }
+        }}
+      />
     </div>
   );
 };
@@ -72,10 +90,13 @@ export default MarkedPositionsPage;
 
 interface ImagePositionsTableProps {
   positions?: MarkedPosition[];
+  onDelete: (position: MarkedPosition) => Promise<void>;
 }
 const ImagePositionsTable: React.FC<ImagePositionsTableProps> = ({
   positions,
+  onDelete,
 }) => {
+  const [deletedIndex, setDeletedIndex] = useState(-1);
   return (
     <Table>
       <TableHeader>
@@ -84,6 +105,7 @@ const ImagePositionsTable: React.FC<ImagePositionsTableProps> = ({
           <TableHead>Text</TableHead>
           <TableHead>Top</TableHead>
           <TableHead>Left</TableHead>
+          <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -93,9 +115,41 @@ const ImagePositionsTable: React.FC<ImagePositionsTableProps> = ({
             <TableCell>{position.text}</TableCell>
             <TableCell>{position.position.top}</TableCell>
             <TableCell>{position.position.left}</TableCell>
+            <TableCell>
+              <DeleteButton
+                loading={deletedIndex === i}
+                onClick={async () => {
+                  setDeletedIndex(i);
+                  await onDelete(position);
+                  setDeletedIndex(-1);
+                }}
+              >
+                Delete
+              </DeleteButton>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
+  );
+};
+
+interface DeleteButtonProps {
+  onClick?: () => void;
+  loading: boolean;
+  children: string;
+}
+const DeleteButton: React.FC<DeleteButtonProps> = ({
+  onClick,
+  loading,
+  children,
+}) => {
+  return (
+    <Button variant="outline" onClick={onClick} disabled={loading}>
+      <span className="flex items-center gap-2">
+        {loading ? <Loader size={16} /> : <Trash2 size={16} color="red" />}{" "}
+        <span>{children}</span>
+      </span>
+    </Button>
   );
 };
