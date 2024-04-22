@@ -27,7 +27,7 @@ const NavigateImage: React.FC<NavigateImageProps> = ({}) => {
     MarkedPosition[]
   >("markedPositions", []);
   const [queryText, setQueryText] = useState("");
-  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [position, setPosition] = useState({ top: "0%", left: "0%" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [speaking, setSpeaking] = useState(false);
@@ -37,13 +37,14 @@ const NavigateImage: React.FC<NavigateImageProps> = ({}) => {
     const result = await axios.get(
       `${env.SKARTNER_AI}/navigate_image?user_query=${user_query}`
     );
-    const content = result.data;
     console.log("result.data", result.data);
-    try {
-      const [top, left] = JSON.parse(content.content);
-      setPosition({ top, left });
-    } catch (e) {
+    if (
+      result.data.content.top === "-1%" &&
+      result.data.content.left === "-1%"
+    ) {
       setError(true);
+    } else {
+      setPosition(result.data.content);
     }
     setLoading(false);
   };
@@ -138,7 +139,7 @@ const NavigateImage: React.FC<NavigateImageProps> = ({}) => {
             aria-label="Loading Spinner"
             data-testid="loader"
           />
-          {error && <p className="text-red-500">Error</p>}
+          {error && <p className="text-red-500">Not Found</p>}
         </div>
         <div className="h-[10px]"></div>
       </div>
@@ -175,8 +176,8 @@ const NavigateImage: React.FC<NavigateImageProps> = ({}) => {
           <div
             className="absolute h-[20px] w-[20px] rounded-full bg-red-500 opacity-80"
             style={{
-              top: `${position.top}%`,
-              left: `${position.left}%`,
+              top: position.top,
+              left: position.left,
             }}
           ></div>
           <img src="/form_image.png" alt="form image" className="h-full" />
