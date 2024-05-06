@@ -23,6 +23,9 @@ const SampleLastTranscript: React.FC<SampleLastTranscriptProps> = ({}) => {
         );
       };
       stopRecognizerRef.current = speechRecognizer;
+      speechRecognizer.onspeechend = () => {
+        setSpeaking(false);
+      };
     } else {
       alert(
         "Your browser is not supported. Please download Google chrome or Update your Google chrome!!"

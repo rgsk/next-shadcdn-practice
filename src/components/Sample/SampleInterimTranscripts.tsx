@@ -23,12 +23,15 @@ const SampleInterimTranscripts: React.FC<
       // @ts-ignore
       speechRecognizer.onresult = function (event) {
         var interimTranscripts = "";
+        // console.log("--------------------");
         for (var i = event.resultIndex; i < event.results.length; i++) {
           var transcript = event.results[i][0].transcript;
           //   transcript.replace("\n", "<br>");
           if (event.results[i].isFinal) {
+            // console.log("final", transcript);
             finalTranscripts += transcript;
           } else {
+            // console.log("interim", transcript);
             interimTranscripts += transcript;
           }
         }
@@ -36,6 +39,9 @@ const SampleInterimTranscripts: React.FC<
         setTranscriptsInterim(interimTranscripts);
       };
       stopRecognizerRef.current = speechRecognizer;
+      speechRecognizer.onspeechend = () => {
+        setSpeaking(false);
+      };
     } else {
       alert(
         "Your browser is not supported. Please download Google chrome or Update your Google chrome!!"

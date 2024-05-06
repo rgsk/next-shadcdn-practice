@@ -1,7 +1,7 @@
-import SampleLastTranscript from "../Sample/SampleLastTranscript";
+import SampleInterimTranscripts from "../Sample/SampleInterimTranscripts";
 
 interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
-  return <SampleLastTranscript />;
+  return <SampleInterimTranscripts />;
 };
 export default ChatPage;
