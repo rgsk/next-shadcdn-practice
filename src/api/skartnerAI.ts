@@ -5,13 +5,16 @@ const skartnerAI = {
   chat: async ({
     sessionId,
     userMessage,
+    filesAttachedUrls,
   }: {
     sessionId: string;
     userMessage: string;
+    filesAttachedUrls: string[];
   }) => {
     const response = await axios.post(`${env.SKARTNER_AI}/chat`, {
       session_id: sessionId,
       user_message: userMessage,
+      files_attached_urls: filesAttachedUrls,
     });
     return response.data;
   },

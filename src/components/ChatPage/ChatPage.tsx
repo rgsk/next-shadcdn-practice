@@ -1,7 +1,9 @@
 import skartnerAI from "@/api/skartnerAI";
 import useResizeObserver from "@/hooks/useResizeObserver";
 import useWindowSize from "@/hooks/useWindowSize";
+import { getUploadURL, getUrlFromUploadUrl } from "@/lib/s3Utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
@@ -19,6 +21,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     queryKey: chatSessionsQuery.key,
     queryFn: chatSessionsQuery.fn,
   });
+  const [filesAttachedUrls, setFilesAttachedUrls] = useState<string[]>([]);
   const sessionIds = chatSessionsQueryResult.data;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const messageInputContainerRef = useRef<HTMLDivElement>(null);
@@ -51,14 +54,14 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     scrollToBottom();
   }, [messages]);
   const handleSend = () => {
-    chatMutation.mutate({ sessionId, userMessage: text });
+    chatMutation.mutate({ sessionId, userMessage: text, filesAttachedUrls });
     setMessages((prev) => [...(prev ?? []), { type: "human", content: text }]);
     setText("");
   };
 
   return (
     <div className="flex bg-[#212121] h-screen overflow-hidden">
-      <div className="min-w-[400px]"></div>
+      {/* <div className="min-w-[400px]"></div> */}
       <div className="flex-1">
         <div className="">
           <div
@@ -88,6 +91,23 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               )}
             </div>
           </div>
+          <input
+            type="file"
+            multiple
+            onChange={async (event) => {
+              const files = event.target.files;
+
+              const fileUrls = await Promise.all(
+                [...(files ?? [])].map(async (file) => {
+                  const uploadUrl = await getUploadURL({ key: file.name });
+                  await axios.put(uploadUrl, file);
+                  const fileUrl = getUrlFromUploadUrl(uploadUrl);
+                  return fileUrl;
+                })
+              );
+              setFilesAttachedUrls(fileUrls);
+            }}
+          />
           <div className="flex justify-center">
             <div ref={messageInputContainerRef} className="w-[800px]">
               <form
