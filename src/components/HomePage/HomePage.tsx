@@ -7,6 +7,7 @@ const HomePage: React.FC<HomePageProps> = ({}) => {
       <Link href="/navigate-image">Navigate Image</Link>
       <Link href="/transcribe-text">Transcribe Text</Link>
       <Link href="/text-to-speech-example">Text To Speech Example</Link>
+      <Link href="/chat">Chat</Link>
     </div>
   );
 };
