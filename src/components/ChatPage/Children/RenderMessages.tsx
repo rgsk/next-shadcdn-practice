@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import html from "@/utils/html";
 import hljs from "highlight.js";
 import { marked } from "marked";
@@ -121,8 +122,10 @@ const RenderMessages: React.FC<RenderMessagesProps> = ({ messages }) => {
 };
 export default RenderMessages;
 
-interface OpenAILogoProps {}
-const OpenAILogo: React.FC<OpenAILogoProps> = ({}) => {
+interface OpenAILogoProps {
+  className?: string;
+}
+export const OpenAILogo: React.FC<OpenAILogoProps> = ({ className }) => {
   return (
     <svg
       width="41"
@@ -130,7 +133,7 @@ const OpenAILogo: React.FC<OpenAILogoProps> = ({}) => {
       viewBox="0 0 41 41"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="w-4 h-4"
+      className={cn("w-4 h-4", className)}
       role="img"
     >
       <text x="-9999" y="-9999">

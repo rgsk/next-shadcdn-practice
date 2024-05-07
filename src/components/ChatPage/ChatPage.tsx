@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { Button } from "../ui/button";
-import RenderMessages from "./Children/RenderMessages";
+import RenderMessages, { OpenAILogo } from "./Children/RenderMessages";
 export type Message = { type: "human" | "ai"; content: string };
 interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
@@ -70,9 +70,22 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
             ref={scrollContainerRef}
           >
             <div className="w-[800px]">
-              <div className="h-[30px]"></div>
-              <RenderMessages messages={messages} />
-              <div className="h-[30px]"></div>
+              {messages && messages.length ? (
+                <>
+                  <div className="h-[30px]"></div>
+                  <RenderMessages messages={messages} />
+                  <div className="h-[30px]"></div>{" "}
+                </>
+              ) : (
+                <div className="h-full flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="border border-gray-600 rounded-full p-1.5">
+                      <OpenAILogo className="w-8 h-8" />
+                    </div>
+                    <h3 className="text-2xl">How can I help you today?</h3>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <div className="flex justify-center">
