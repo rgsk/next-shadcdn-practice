@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import env from "@/lib/env";
 import axios from "axios";
 import { useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -86,7 +87,7 @@ const WebSpeechAPITextToSpeech: React.FC<
 
             if (method == Methods.buffer) {
               const response = await axios.post(
-                "http://localhost:8000/general/text-to-speech-buffer",
+                `${env.SKARTNER_SERVER}/general/text-to-speech-buffer`,
                 {
                   input: text,
                   voice: voiceName,
@@ -100,7 +101,7 @@ const WebSpeechAPITextToSpeech: React.FC<
               setAudioUrl(localUrl);
             } else {
               const response = await axios.post(
-                "http://localhost:8000/general/text-to-speech",
+                `${env.SKARTNER_SERVER}/general/text-to-speech`,
                 {
                   input: text,
                   voice: voiceName,
