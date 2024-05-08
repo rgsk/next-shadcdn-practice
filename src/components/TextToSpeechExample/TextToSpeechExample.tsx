@@ -65,7 +65,7 @@ const WebSpeechAPITextToSpeech: React.FC<
         <SelectContent>
           {textToSpeechVoices.map((voice) => (
             <SelectItem key={voice} value={voice}>
-              {voice}
+              {voice == webSpeechVoice ? "" : "openai -"} {voice}
             </SelectItem>
           ))}
         </SelectContent>
