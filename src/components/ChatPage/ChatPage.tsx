@@ -8,6 +8,7 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
+import { useSpeechToText } from "../Sample/SampleUseSpeechToText";
 import { useTranscripts } from "../Sample/SampleUseTranscripts";
 import { Button } from "../ui/button";
 import RenderMessages, { OpenAILogo } from "./Children/RenderMessages";
@@ -21,7 +22,12 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const sessionId = `${email}/${sessionSuffix}`;
   const { finalTranscripts, interimTranscripts, speaking, toggleTranscribe } =
     useTranscripts();
-
+  const {
+    handleStartRecording,
+    handleStopRecording,
+    transcription,
+    recording,
+  } = useSpeechToText();
   const chatSessionsQuery = skartnerAI.chatSessions(`${email}/`);
   const chatSessionsQueryResult = useQuery({
     queryKey: chatSessionsQuery.key,
@@ -48,6 +54,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       chatHistoryQueryResult.refetch();
       playAudio(value.assistant_message);
     },
+  });
+  const mergeTextMutation = useMutation({
+    mutationFn: skartnerAI.mergeText,
   });
 
   const playAudio = async (text: string) => {
@@ -84,21 +93,41 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-  const handleSend = () => {
+  const handleSend = (text: string) => {
     chatMutation.mutate({ sessionId, userMessage: text, filesAttachedUrls });
     const newMessage = { type: "human" as const, content: text };
     setMessages((prev) => [...(prev ?? []), newMessage]);
     setText("");
   };
   useEffect(() => {
-    setText(interimTranscripts);
-  }, [interimTranscripts]);
+    if (interimTranscripts) {
+      setText(interimTranscripts);
+      if (!recording) {
+        handleStartRecording();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [interimTranscripts, recording]);
   useEffect(() => {
     if (finalTranscripts) {
-      handleSend();
+      setText(finalTranscripts);
+      handleStopRecording();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finalTranscripts]);
+  useEffect(() => {
+    if (transcription) {
+      mergeTextMutation.mutate(
+        { first: text, second: transcription },
+        {
+          onSuccess: (value) => {
+            handleSend(value);
+          },
+        }
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transcription]);
   return (
     <div className="flex bg-[#212121] h-screen overflow-hidden">
       {/* <div className="min-w-[400px]"></div> */}
@@ -175,7 +204,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                 className="relative flex"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  handleSend();
+                  handleSend(text);
                 }}
               >
                 <TextareaAutosize
@@ -188,7 +217,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
-                      handleSend();
+                      handleSend(text);
                     }
                   }}
                   placeholder="Message"

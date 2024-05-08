@@ -1,12 +1,12 @@
 "use client";
 import React from "react";
-import SampleUseTranscripts from "../Sample/SampleUseTranscripts";
+import SampleUseSpeechToText from "../Sample/SampleUseSpeechToText";
 
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
   return (
     <div>
-      <SampleUseTranscripts />
+      <SampleUseSpeechToText />
     </div>
   );
 };

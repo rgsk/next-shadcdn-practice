@@ -38,5 +38,14 @@ const skartnerAI = {
       },
     };
   },
+  mergeText: async ({ first, second }: { first: string; second: string }) => {
+    const response = await axios.post<string>(`${env.SKARTNER_AI}/merge_text`, {
+      first,
+      second,
+    });
+    const merged = response.data;
+    // console.log({ first, second, merged });
+    return merged;
+  },
 };
 export default skartnerAI;
