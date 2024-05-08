@@ -8,6 +8,7 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
+import { useTranscripts } from "../Sample/SampleUseTranscripts";
 import { Button } from "../ui/button";
 import RenderMessages, { OpenAILogo } from "./Children/RenderMessages";
 export type Message = { type: "human" | "ai"; content: string };
@@ -18,6 +19,9 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const { email, sessionSuffix } = router.query;
   const [text, setText] = useState("");
   const sessionId = `${email}/${sessionSuffix}`;
+  const { finalTranscripts, interimTranscripts, speaking, toggleTranscribe } =
+    useTranscripts();
+
   const chatSessionsQuery = skartnerAI.chatSessions(`${email}/`);
   const chatSessionsQueryResult = useQuery({
     queryKey: chatSessionsQuery.key,
@@ -45,19 +49,29 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
       playAudio(value.assistant_message);
     },
   });
+
   const playAudio = async (text: string) => {
-    const response = await axios.post(
-      `${env.SKARTNER_SERVER}/general/text-to-speech-buffer`,
-      {
-        input: text,
-        voice: "nova",
-      },
-      { responseType: "arraybuffer" }
-    );
-    const data = response.data;
-    const blob = new Blob([data]);
-    const localUrl = URL.createObjectURL(blob);
-    setAudioUrl(localUrl);
+    const openai = true;
+    if (openai) {
+      const response = await axios.post(
+        `${env.SKARTNER_SERVER}/general/text-to-speech-buffer`,
+        {
+          input: text,
+          voice: "nova",
+        },
+        { responseType: "arraybuffer" }
+      );
+      const data = response.data;
+      const blob = new Blob([data]);
+      const localUrl = URL.createObjectURL(blob);
+      setAudioUrl(localUrl);
+    } else {
+      // stop any speaking in progress
+      window.speechSynthesis.cancel();
+      // speak text
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
+    }
   };
   const scrollToBottom = () => {
     const scrollContainer = scrollContainerRef.current;
@@ -76,7 +90,15 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
     setMessages((prev) => [...(prev ?? []), newMessage]);
     setText("");
   };
-
+  useEffect(() => {
+    setText(interimTranscripts);
+  }, [interimTranscripts]);
+  useEffect(() => {
+    if (finalTranscripts) {
+      handleSend();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finalTranscripts]);
   return (
     <div className="flex bg-[#212121] h-screen overflow-hidden">
       {/* <div className="min-w-[400px]"></div> */}
@@ -127,6 +149,16 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
                 setFilesAttachedUrls(fileUrls);
               }}
             />
+            <Button onClick={toggleTranscribe}>
+              {speaking ? (
+                <div>
+                  <div className="h-[20px] w-[20px] rounded-sm border-2 border-black"></div>
+                </div>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <div className="w-[20px] h-[20px] rounded-full bg-red-500"></div>
+              )}
+            </Button>
             <audio
               id="audioPlayer"
               className="hidden"
