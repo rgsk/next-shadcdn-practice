@@ -1,3 +1,5 @@
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -9,6 +11,7 @@ import axios from "axios";
 import { useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import { Button } from "../ui/button";
+
 interface TextToSpeechExampleProps {}
 const TextToSpeechExample: React.FC<TextToSpeechExampleProps> = ({}) => {
   return (
@@ -29,6 +32,11 @@ const textToSpeechVoices = [
   "shimmer",
 ];
 
+enum Methods {
+  buffer = "buffer",
+  "upload-url" = "upload-url",
+}
+
 const initialText =
   "Hello! Feel free to change this text and don't forget to turn your volume on.";
 interface WebSpeechAPITextToSpeechProps {}
@@ -39,6 +47,8 @@ const WebSpeechAPITextToSpeech: React.FC<
   const [voiceName, setVoiceName] = useState(webSpeechVoice);
   const [audioUrl, setAudioUrl] = useState<string>();
   const [loading, setLoading] = useState(false);
+  const [method, setMethod] = useState(Methods.buffer);
+
   return (
     <div className="flex flex-col items-start p-4">
       <textarea
@@ -74,17 +84,32 @@ const WebSpeechAPITextToSpeech: React.FC<
           } else {
             setLoading(true);
 
-            const response = await axios.post<{ url: string }>(
-              "http://localhost:8000/general/text-to-speech",
-              {
-                input: text,
-                voice: voiceName,
-              }
-            );
-            const data = response.data;
-            const url = data.url;
-            setLoading(false);
-            setAudioUrl(url);
+            if (method == Methods.buffer) {
+              const response = await axios.post(
+                "http://localhost:8000/general/text-to-speech-buffer",
+                {
+                  input: text,
+                  voice: voiceName,
+                },
+                { responseType: "arraybuffer" }
+              );
+              const data = response.data;
+              const blob = new Blob([data]);
+              const localUrl = URL.createObjectURL(blob);
+              setLoading(false);
+              setAudioUrl(localUrl);
+            } else {
+              const response = await axios.post(
+                "http://localhost:8000/general/text-to-speech",
+                {
+                  input: text,
+                  voice: voiceName,
+                }
+              );
+              const data = response.data;
+              setLoading(false);
+              setAudioUrl(data.url);
+            }
           }
         }}
       >
@@ -98,10 +123,41 @@ const WebSpeechAPITextToSpeech: React.FC<
         aria-label="Loading Spinner"
         data-testid="loader"
       />
+      <div className="h-[20px]"></div>
       {audioUrl && (
-        <audio id="audioPlayer" controls src={audioUrl}>
-          Your browser does not support the audio element.
-        </audio>
+        <>
+          <audio id="audioPlayer" controls src={audioUrl}>
+            Your browser does not support the audio element.
+          </audio>
+          <div className="h-[20px]"></div>
+          <p>Audio Url: </p>
+          <p>{audioUrl}</p>
+          <div className="h-[20px]"></div>
+        </>
+      )}
+      {voiceName === webSpeechVoice ? null : (
+        <>
+          <div className="h-[1px] w-full bg-gray-300"></div>
+          <div className="h-[20px]"></div>
+          <p>Upload Method:</p>
+          <div className="h-[20px]"></div>
+          <RadioGroup
+            value={method}
+            onValueChange={(v) => setMethod((Methods as any)[v])}
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value={Methods.buffer} id={Methods.buffer} />
+              <Label htmlFor={Methods.buffer}>Buffer</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem
+                value={Methods["upload-url"]}
+                id={Methods["upload-url"]}
+              />
+              <Label htmlFor={Methods["upload-url"]}>Upload Url</Label>
+            </div>
+          </RadioGroup>
+        </>
       )}
     </div>
   );

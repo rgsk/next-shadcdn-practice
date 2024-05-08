@@ -1,12 +1,12 @@
 "use client";
 import React from "react";
-import SampleLastTranscript from "../Sample/SampleLastTranscript";
+import TextToSpeechExample from "../TextToSpeechExample/TextToSpeechExample";
 
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
   return (
     <div>
-      <SampleLastTranscript />
+      <TextToSpeechExample />
     </div>
   );
 };
