@@ -1,6 +1,7 @@
 import skartnerAI from "@/api/skartnerAI";
 import useResizeObserver from "@/hooks/useResizeObserver";
 import useWindowSize from "@/hooks/useWindowSize";
+import env from "@/lib/env";
 import { getUploadURL, getUrlFromUploadUrl } from "@/lib/s3Utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -13,6 +14,7 @@ export type Message = { type: "human" | "ai"; content: string };
 interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const router = useRouter();
+  const [audioUrl, setAudioUrl] = useState<string>();
   const { email, sessionSuffix } = router.query;
   const [text, setText] = useState("");
   const sessionId = `${email}/${sessionSuffix}`;
@@ -38,10 +40,25 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   }, [chatHistoryQueryResult.data?.messages]);
   const chatMutation = useMutation({
     mutationFn: skartnerAI.chat,
-    onSuccess: () => {
+    onSuccess: (value) => {
       chatHistoryQueryResult.refetch();
+      playAudio(value.assistant_message);
     },
   });
+  const playAudio = async (text: string) => {
+    const response = await axios.post(
+      `${env.SKARTNER_SERVER}/general/text-to-speech-buffer`,
+      {
+        input: text,
+        voice: "nova",
+      },
+      { responseType: "arraybuffer" }
+    );
+    const data = response.data;
+    const blob = new Blob([data]);
+    const localUrl = URL.createObjectURL(blob);
+    setAudioUrl(localUrl);
+  };
   const scrollToBottom = () => {
     const scrollContainer = scrollContainerRef.current;
     if (scrollContainer) {
@@ -55,7 +72,8 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   }, [messages]);
   const handleSend = () => {
     chatMutation.mutate({ sessionId, userMessage: text, filesAttachedUrls });
-    setMessages((prev) => [...(prev ?? []), { type: "human", content: text }]);
+    const newMessage = { type: "human" as const, content: text };
+    setMessages((prev) => [...(prev ?? []), newMessage]);
     setText("");
   };
 
@@ -91,23 +109,34 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               )}
             </div>
           </div>
-          <input
-            type="file"
-            multiple
-            onChange={async (event) => {
-              const files = event.target.files;
+          <div className="flex">
+            <input
+              type="file"
+              multiple
+              onChange={async (event) => {
+                const files = event.target.files;
 
-              const fileUrls = await Promise.all(
-                [...(files ?? [])].map(async (file) => {
-                  const uploadUrl = await getUploadURL({ key: file.name });
-                  await axios.put(uploadUrl, file);
-                  const fileUrl = getUrlFromUploadUrl(uploadUrl);
-                  return fileUrl;
-                })
-              );
-              setFilesAttachedUrls(fileUrls);
-            }}
-          />
+                const fileUrls = await Promise.all(
+                  [...(files ?? [])].map(async (file) => {
+                    const uploadUrl = await getUploadURL({ key: file.name });
+                    await axios.put(uploadUrl, file);
+                    const fileUrl = getUrlFromUploadUrl(uploadUrl);
+                    return fileUrl;
+                  })
+                );
+                setFilesAttachedUrls(fileUrls);
+              }}
+            />
+            <audio
+              id="audioPlayer"
+              className="hidden"
+              controls
+              src={audioUrl}
+              autoPlay
+            >
+              Your browser does not support the audio element.
+            </audio>
+          </div>
           <div className="flex justify-center">
             <div ref={messageInputContainerRef} className="w-[800px]">
               <form
