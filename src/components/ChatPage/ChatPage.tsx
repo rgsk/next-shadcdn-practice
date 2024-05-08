@@ -40,6 +40,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const windowSize = useWindowSize();
   const messageInputContainer = useResizeObserver(messageInputContainerRef);
   const chatHistoryQuery = skartnerAI.chatHistory(`${email}/${sessionSuffix}`);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const chatHistoryQueryResult = useQuery({
     queryKey: chatHistoryQuery.key,
     queryFn: chatHistoryQuery.fn,
@@ -101,6 +102,10 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   };
   useEffect(() => {
     if (interimTranscripts) {
+      const audio = audioRef.current;
+      if (audio) {
+        audio.pause();
+      }
       setText(interimTranscripts);
       if (!recording) {
         handleStartRecording();
@@ -189,6 +194,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               )}
             </Button>
             <audio
+              ref={audioRef}
               id="audioPlayer"
               className="hidden"
               controls
