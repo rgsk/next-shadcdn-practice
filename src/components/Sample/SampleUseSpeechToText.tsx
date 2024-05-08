@@ -3,15 +3,16 @@ import { Button } from "@/components/ui/button";
 import env from "@/lib/env";
 import axios from "axios";
 import { useRef, useState } from "react";
-
-export const useSpeechToText = () => {
+import GenerateRadio from "../Shared/GenerateRadio";
+type SpeechToTextType = "transcription" | "translation";
+export const useSpeechToText = (type: SpeechToTextType = "transcription") => {
   const [recording, setRecording] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string>();
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const [transcription, setTranscription] = useState<string>();
-  const [translation, setTranslation] = useState<string>();
+  const [text, setText] = useState<string>();
   const resetFields = () => {
-    setTranscription(undefined);
-    setTranslation(undefined);
+    setText(undefined);
+    setAudioUrl(undefined);
   };
   const handleStartRecording = () => {
     resetFields();
@@ -40,32 +41,34 @@ export const useSpeechToText = () => {
   };
 
   const handleDownload = async (blob: Blob) => {
+    const localUrl = URL.createObjectURL(blob);
+    setAudioUrl(localUrl);
     const formData = new FormData();
     formData.append("audio", blob);
     const response = await axios.post(
-      `${env.SKARTNER_SERVER}/general/speech-to-text`,
+      `${env.SKARTNER_SERVER}/general/speech-to-text?&type=${type}`,
       formData
     );
-    setTranscription(response.data.transcription);
-    setTranslation(response.data.translation);
+    setText(response.data.text);
   };
   return {
     recording,
     handleStartRecording,
     handleStopRecording,
-    transcription,
-    translation,
+    text,
+    audioUrl,
   };
 };
 
 const SampleUseSpeechToText = () => {
+  const [type, setType] = useState<SpeechToTextType>("transcription");
   const {
     handleStartRecording,
     handleStopRecording,
     recording,
-    transcription,
-    translation,
-  } = useSpeechToText();
+    text,
+    audioUrl,
+  } = useSpeechToText(type);
   return (
     <div className="p-4">
       <div className="flex gap-4">
@@ -77,13 +80,24 @@ const SampleUseSpeechToText = () => {
         </Button>
       </div>
       <div className="h-[20px]"></div>
-      <p>Transcription: </p>
+
+      <p>{text}</p>
       <div className="h-[20px]"></div>
-      <p>{transcription}</p>
+      <GenerateRadio
+        options={[
+          { value: "transcription", label: "Transcription" },
+          { value: "translation", label: "Translation" },
+        ]}
+        value={type}
+        onValueChange={(v) => {
+          setType(v as any);
+        }}
+      />
       <div className="h-[20px]"></div>
-      <p>Translation: </p>
+      <p>{audioUrl}</p>
       <div className="h-[20px]"></div>
-      <p>{translation}</p>
+      <audio controls src={audioUrl} />
+      <div className="h-[20px]"></div>
     </div>
   );
 };

@@ -25,7 +25,7 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
   const {
     handleStartRecording,
     handleStopRecording,
-    transcription,
+    text: transcription,
     recording,
   } = useSpeechToText();
   const chatSessionsQuery = skartnerAI.chatSessions(`${email}/`);
