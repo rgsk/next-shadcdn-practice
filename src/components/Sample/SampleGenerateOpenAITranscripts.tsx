@@ -1,19 +1,22 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import {
-  getPresignedUrl,
-  getUploadURL,
-  getUrlFromUploadUrl,
-} from "@/lib/s3Utils";
+import env from "@/lib/env";
 import axios from "axios";
 import { useRef, useState } from "react";
-const SampleAudioRecorder = () => {
+
+const SampleGenerateOpenAITranscripts = () => {
   const [recording, setRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const [audioUrl, setAudioUrl] = useState<string>();
-  const [remoteUrl, setRemoteUrl] = useState<string>();
-
+  const [transcription, setTranscription] = useState<string>();
+  const [translation, setTranslation] = useState<string>();
+  const resetFields = () => {
+    setAudioUrl(undefined);
+    setTranscription(undefined);
+    setTranslation(undefined);
+  };
   const handleStartRecording = () => {
+    resetFields();
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then((stream) => {
@@ -41,13 +44,14 @@ const SampleAudioRecorder = () => {
   const handleDownload = async (blob: Blob) => {
     const localUrl = URL.createObjectURL(blob);
     setAudioUrl(localUrl);
-    const extension = blob.type.split(";")[0].split("/")[1];
-    const filename = "sample-audio-" + Date.now() + "." + extension;
-    const uploadUrl = await getUploadURL({ key: filename });
-    await axios.put(uploadUrl, blob);
-    const fileUrl = getUrlFromUploadUrl(uploadUrl);
-    const presignedUrl = await getPresignedUrl(fileUrl);
-    setRemoteUrl(presignedUrl);
+    const formData = new FormData();
+    formData.append("audio", blob);
+    const response = await axios.post(
+      `${env.SKARTNER_SERVER}/general/speech-to-text`,
+      formData
+    );
+    setTranscription(response.data.transcription);
+    setTranslation(response.data.translation);
   };
 
   return (
@@ -63,20 +67,20 @@ const SampleAudioRecorder = () => {
       <div className="h-[20px]"></div>
       <p>Local Url: </p>
       <div className="h-[20px]"></div>
+
       <p>{audioUrl}</p>
       <div className="h-[20px]"></div>
 
       <audio controls src={audioUrl} />
       <div className="h-[20px]"></div>
-
-      <p>Remote Url: </p>
+      <p>Transcription: </p>
       <div className="h-[20px]"></div>
-
-      <p>{remoteUrl}</p>
+      <p>{transcription}</p>
       <div className="h-[20px]"></div>
-
-      <audio controls src={remoteUrl} />
+      <p>Translation: </p>
+      <div className="h-[20px]"></div>
+      <p>{translation}</p>
     </div>
   );
 };
-export default SampleAudioRecorder;
+export default SampleGenerateOpenAITranscripts;
