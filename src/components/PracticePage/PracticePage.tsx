@@ -1,12 +1,12 @@
 "use client";
 import React from "react";
-import SampleGenerateOpenAITranscripts from "../Sample/SampleGenerateOpenAITranscripts";
+import SampleLastTranscript from "../Sample/SampleLastTranscript";
 
 interface PracticePageProps {}
 const PracticePage: React.FC<PracticePageProps> = ({}) => {
   return (
     <div>
-      <SampleGenerateOpenAITranscripts />
+      <SampleLastTranscript />
     </div>
   );
 };

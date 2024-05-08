@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 interface SampleLastTranscriptProps {}
 const SampleLastTranscript: React.FC<SampleLastTranscriptProps> = ({}) => {
   const [speaking, setSpeaking] = useState(false);
-  const [transcriptsFinal, setTranscriptsFinal] = useState("");
+  const [transcriptsFinal, setTranscriptsFinal] = useState<string[]>([]);
   const stopRecognizerRef = useRef<any>();
   const startConverting = useCallback(() => {
     // @ts-ignore
@@ -18,9 +18,11 @@ const SampleLastTranscript: React.FC<SampleLastTranscriptProps> = ({}) => {
 
       // @ts-ignore
       speechRecognizer.onresult = function (event) {
-        setTranscriptsFinal(
-          event.results[event.results.length - 1][0].transcript
-        );
+        const stored: string[] = [];
+        for (let i = 0; i < event.results.length; i++) {
+          stored.push(event.results[i][0].transcript);
+        }
+        setTranscriptsFinal(stored);
       };
       stopRecognizerRef.current = speechRecognizer;
       speechRecognizer.onspeechend = () => {
@@ -59,7 +61,11 @@ const SampleLastTranscript: React.FC<SampleLastTranscriptProps> = ({}) => {
       <div className="h-[10px]"></div>
       <p className="text-xl">Transcripts</p>
       <div className="h-[10px]"></div>
-      <p>{transcriptsFinal}</p>
+      <div>
+        {transcriptsFinal.map((t, i) => (
+          <p key={i}>{t}</p>
+        ))}
+      </div>
     </div>
   );
 };

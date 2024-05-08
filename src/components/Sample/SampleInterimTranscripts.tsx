@@ -8,6 +8,9 @@ const SampleInterimTranscripts: React.FC<
   const [speaking, setSpeaking] = useState(false);
   const [transcriptsFinal, setTranscriptsFinal] = useState("");
   const [transcriptsInterim, setTranscriptsInterim] = useState("");
+  const [finalTranscriptsList, setFinalTranscriptsList] = useState<string[]>(
+    []
+  );
   const stopRecognizerRef = useRef<any>();
   const startConverting = useCallback(() => {
     // @ts-ignore
@@ -23,7 +26,9 @@ const SampleInterimTranscripts: React.FC<
       // @ts-ignore
       speechRecognizer.onresult = function (event) {
         var interimTranscripts = "";
-        // console.log("--------------------");
+        const _finalTranscriptsList: string[] = [];
+        console.log(event.results);
+        console.log(event.resultIndex);
         for (var i = event.resultIndex; i < event.results.length; i++) {
           var transcript = event.results[i][0].transcript;
           //   transcript.replace("\n", "<br>");
@@ -34,7 +39,11 @@ const SampleInterimTranscripts: React.FC<
             // console.log("interim", transcript);
             interimTranscripts += transcript;
           }
+          if (event.results[i].isFinal) {
+            _finalTranscriptsList.push(transcript);
+          }
         }
+        setFinalTranscriptsList((prev) => [...prev, ..._finalTranscriptsList]);
         setTranscriptsFinal(finalTranscripts);
         setTranscriptsInterim(interimTranscripts);
       };
@@ -79,6 +88,17 @@ const SampleInterimTranscripts: React.FC<
         {transcriptsFinal}
         <span className="text-[#999]">{transcriptsInterim}</span>
       </p>
+
+      <div className="h-[20px]"></div>
+      <p>List:</p>
+      <div className="h-[20px]"></div>
+      <div>
+        <div>
+          {finalTranscriptsList.map((t, i) => (
+            <p key={i}>{t}</p>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
