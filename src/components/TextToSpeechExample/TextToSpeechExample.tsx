@@ -126,7 +126,7 @@ const WebSpeechAPITextToSpeech: React.FC<
       <div className="h-[20px]"></div>
       {audioUrl && (
         <>
-          <audio id="audioPlayer" controls src={audioUrl}>
+          <audio id="audioPlayer" controls src={audioUrl} autoPlay>
             Your browser does not support the audio element.
           </audio>
           <div className="h-[20px]"></div>
