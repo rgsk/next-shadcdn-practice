@@ -88,6 +88,7 @@ const WebSpeechAPITextToSpeech: React.FC<
             if (method == Methods.buffer) {
               const response = await axios.post(
                 `${env.SKARTNER_SERVER}/general/text-to-speech-buffer`,
+                // `/api/text-to-speech`,
                 {
                   input: text,
                   voice: voiceName,

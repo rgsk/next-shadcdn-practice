@@ -27,6 +27,7 @@
     "marked": "^12.0.2",
     "next": "14.1.0",
     "next-themes": "^0.2.1",
+    "openai": "^4.43.0",
     "react": "^18",
     "react-circular-progressbar": "^2.1.0",
     "react-dom": "^18",
@@ -37,7 +38,8 @@
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
     "use-hooks": "^2.0.0-rc.5",
-    "usehooks-ts": "^2.15.1"
+    "usehooks-ts": "^2.15.1",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20",
