@@ -47,5 +47,21 @@ const skartnerAI = {
     // console.log({ first, second, merged });
     return merged;
   },
+  answerEvaluator: async ({
+    type,
+    args,
+  }: {
+    type: "gre_analyze_an_issue_task" | "ielts_writing_task_2";
+    args: any;
+  }) => {
+    const response = await axios.post<any>(
+      `${env.SKARTNER_AI}/answer_evaluator`,
+      {
+        type,
+        args,
+      }
+    );
+    return response.data;
+  },
 };
 export default skartnerAI;
