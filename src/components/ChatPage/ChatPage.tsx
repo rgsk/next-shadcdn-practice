@@ -5,6 +5,7 @@ import env from "@/lib/env";
 import { getUploadURL, getUrlFromUploadUrl } from "@/lib/s3Utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { useTheme } from "next-themes";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
@@ -15,6 +16,10 @@ import RenderMessages, { OpenAILogo } from "./Children/RenderMessages";
 export type Message = { type: "human" | "ai"; content: string };
 interface ChatPageProps {}
 const ChatPage: React.FC<ChatPageProps> = ({}) => {
+  const { setTheme } = useTheme();
+  useEffect(() => {
+    setTheme("dark");
+  }, [setTheme]);
   const router = useRouter();
   const [audioUrl, setAudioUrl] = useState<string>();
   const { email, sessionSuffix } = router.query;
@@ -165,47 +170,50 @@ const ChatPage: React.FC<ChatPageProps> = ({}) => {
               )}
             </div>
           </div>
-          <div className="flex">
-            <input
-              type="file"
-              multiple
-              onChange={async (event) => {
-                const files = event.target.files;
 
-                const fileUrls = await Promise.all(
-                  [...(files ?? [])].map(async (file) => {
-                    const uploadUrl = await getUploadURL({ key: file.name });
-                    await axios.put(uploadUrl, file);
-                    const fileUrl = getUrlFromUploadUrl(uploadUrl);
-                    return fileUrl;
-                  })
-                );
-                setFilesAttachedUrls(fileUrls);
-              }}
-            />
-            <Button onClick={toggleTranscribe}>
-              {speaking ? (
-                <div>
-                  <div className="h-[20px] w-[20px] rounded-sm border-2 border-black"></div>
-                </div>
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <div className="w-[20px] h-[20px] rounded-full bg-red-500"></div>
-              )}
-            </Button>
-            <audio
-              ref={audioRef}
-              id="audioPlayer"
-              className="hidden"
-              controls
-              src={audioUrl}
-              autoPlay
-            >
-              Your browser does not support the audio element.
-            </audio>
-          </div>
           <div className="flex justify-center">
             <div ref={messageInputContainerRef} className="w-[800px]">
+              <div className="flex">
+                <input
+                  type="file"
+                  multiple
+                  onChange={async (event) => {
+                    const files = event.target.files;
+
+                    const fileUrls = await Promise.all(
+                      [...(files ?? [])].map(async (file) => {
+                        const uploadUrl = await getUploadURL({
+                          key: file.name,
+                        });
+                        await axios.put(uploadUrl, file);
+                        const fileUrl = getUrlFromUploadUrl(uploadUrl);
+                        return fileUrl;
+                      })
+                    );
+                    setFilesAttachedUrls(fileUrls);
+                  }}
+                />
+                <Button onClick={toggleTranscribe}>
+                  {speaking ? (
+                    <div>
+                      <div className="h-[20px] w-[20px] rounded-sm border-2 border-black"></div>
+                    </div>
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <div className="w-[20px] h-[20px] rounded-full bg-red-500"></div>
+                  )}
+                </Button>
+                <audio
+                  ref={audioRef}
+                  id="audioPlayer"
+                  className="hidden"
+                  controls
+                  src={audioUrl}
+                  autoPlay
+                >
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
               <form
                 className="relative flex"
                 onSubmit={(e) => {
