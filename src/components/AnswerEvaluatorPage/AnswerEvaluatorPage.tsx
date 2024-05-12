@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import useBreakpoints from "@/hooks/useBreakpoints";
 import {
   getPresignedUrl,
   getUploadURL,
@@ -34,9 +35,11 @@ const nonEmptyStringValidation = z.string().min(1, {
 interface AnswerEvaluatorPageProps {}
 const AnswerEvaluatorPage: React.FC<AnswerEvaluatorPageProps> = ({}) => {
   const { setTheme } = useTheme();
+
   useEffect(() => {
     setTheme("light");
   }, [setTheme]);
+  const breakpoints = useBreakpoints();
   // 1. Define your form.
   const [tab, setTab] = useState<"task1" | "task2">("task1");
 
@@ -52,7 +55,7 @@ const AnswerEvaluatorPage: React.FC<AnswerEvaluatorPageProps> = ({}) => {
       >
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="task1">
-            Task 1 - Analyse graph/chart/diagram
+            Task 1 - Analyse {breakpoints.md ? "Graph/Chart/Diagram" : "Graph"}
           </TabsTrigger>
           <TabsTrigger value="task2">Task 2 - Essay</TabsTrigger>
         </TabsList>
@@ -162,7 +165,7 @@ const Task1Form: React.FC<Task1FormProps> = ({}) => {
                         <img
                           src={image_url}
                           alt="image"
-                          className="w-[500px] max-w-[100vw]"
+                          className="w-[500px] max-w-full"
                         />
                       </>
                     )}
