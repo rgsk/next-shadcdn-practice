@@ -1,6 +1,10 @@
 import env from "@/lib/env";
 import axios from "axios";
-
+export type AnswerEvaluatorType =
+  | "gre_analyze_an_issue_task"
+  | "ielts_writing_task_2"
+  | "ielts_academic_writing_task_1"
+  | "ielts_general_writing_task_1";
 const skartnerAI = {
   chat: async ({
     sessionId,
@@ -51,7 +55,7 @@ const skartnerAI = {
     type,
     args,
   }: {
-    type: "gre_analyze_an_issue_task" | "ielts_writing_task_2";
+    type: AnswerEvaluatorType;
     args: any;
   }) => {
     const response = await axios.post<any>(
