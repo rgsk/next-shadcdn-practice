@@ -56,10 +56,10 @@ const AnswerEvaluatorPage: React.FC<AnswerEvaluatorPageProps> = ({}) => {
           </TabsTrigger>
           <TabsTrigger value="task2">Task 2 - Essay</TabsTrigger>
         </TabsList>
-        <TabsContent value="task1">
+        <TabsContent forceMount value="task1" hidden={tab !== "task1"}>
           <Task1Form />
         </TabsContent>
-        <TabsContent value="task2">
+        <TabsContent forceMount value="task2" hidden={tab !== "task2"}>
           <Task2Form />
         </TabsContent>
       </Tabs>
