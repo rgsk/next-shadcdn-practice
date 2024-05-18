@@ -14,6 +14,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import useBreakpoints from "@/hooks/useBreakpoints";
+import eventTracker from "@/lib/eventTracker";
 import {
   getPresignedUrl,
   getUploadURL,
@@ -101,6 +102,12 @@ const Task1Form: React.FC<Task1FormProps> = ({}) => {
         image_url: values.image_url,
         attempt: values.attempt,
       },
+    });
+    eventTracker.answerEvaluated({
+      type: "ielts_academic_writing_task_1",
+      task: values.task,
+      image_url: values.image_url,
+      attempt: values.attempt,
     });
   }
   const image_url = form.watch("image_url");
@@ -238,6 +245,11 @@ const Task2Form: React.FC<Task2FormProps> = ({}) => {
         task: values.task,
         attempt: values.attempt,
       },
+    });
+    eventTracker.answerEvaluated({
+      type: "ielts_writing_task_2",
+      task: values.task,
+      attempt: values.attempt,
     });
   }
 
