@@ -27,8 +27,8 @@ import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import ClipLoader from "react-spinners/ClipLoader";
+import { v4 } from "uuid";
 import { Input } from "../ui/input";
-
 const nonEmptyStringValidation = z.string().min(1, {
   message: "this field should not be empty",
 });
@@ -151,12 +151,13 @@ const Task1Form: React.FC<Task1FormProps> = ({}) => {
                     <Input
                       ref={imageFileInputRef}
                       type="file"
+                      accept="image/*"
                       onChange={async (event) => {
                         const file = event.target.files?.[0];
                         if (file) {
                           const uploadUrl = await getUploadURL({
-                            key:
-                              Date.now() + "-" + file.name.replaceAll(" ", "-"),
+                            key: v4(),
+                            // Date.now() + "-" + file.name.replaceAll(" ", "-"),
                           });
                           await axios.put(uploadUrl, file);
                           const fileUrl = getUrlFromUploadUrl(uploadUrl);
